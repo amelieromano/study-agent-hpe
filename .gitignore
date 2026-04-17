@@ -1,0 +1,27 @@
+# Secrets
+.env
+
+# Vector store
+chroma_db/
+
+# Course content
+course_materials/
+user_uploads/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.claude/
+
+# Large binary course files — keep folder structure only
+module_materials/**/*.pdf
+module_materials/**/*.docx
+module_materials/**/*.pptx
