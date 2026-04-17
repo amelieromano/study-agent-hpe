@@ -2,7 +2,7 @@ streamlit
 langchain
 langchain-community
 langchain-openai
-chromadb
+chromadb==0.5.3
 langchain-chroma
 openai
 pypdf
