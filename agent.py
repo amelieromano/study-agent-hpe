@@ -2,7 +2,8 @@ from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 
 load_dotenv()
 
@@ -588,29 +589,27 @@ class StudyAgent:
         else:
             k = 5
 
-        chain = RetrievalQA.from_chain_type(
-            llm=self.llm,
-            retriever=self.vectorstore.as_retriever(search_kwargs={"k": k}),
-            return_source_documents=True,
-            chain_type_kwargs={"prompt": PROMPTS[mode]},
-        )
+        retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
+        source_docs = retriever.invoke(question)
+        context = "\n\n".join(doc.page_content for doc in source_docs)
 
-        result = chain.invoke({"query": question})
+        chain = PROMPTS[mode] | self.llm | StrOutputParser()
+        answer = chain.invoke({"context": context, "question": question})
 
-        source_files = list({doc.metadata.get("source", "unknown") for doc in result["source_documents"]})
-        past_paper_sources = [
+        source_files = list({doc.metadata.get("source", "unknown") for doc in source_docs})
+        past_paper_sources = list({
             doc.metadata.get("source", "unknown")
-            for doc in result["source_documents"]
+            for doc in source_docs
             if doc.metadata.get("doc_type") == "past_paper"
-        ]
+        })
 
         return {
             "module": self.module_key,
             "mode": mode,
             "question": question,
-            "answer": result["result"],
+            "answer": answer,
             "sources": source_files,
-            "past_paper_sources": list(set(past_paper_sources)),
+            "past_paper_sources": past_paper_sources,
         }
 
 
