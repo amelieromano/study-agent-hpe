@@ -426,6 +426,8 @@ Theme Map:""",
         template="""You are a UCL university study assistant for a quantitative economics module.
 Use ONLY the context below to ground the problems in real course material. Do not use outside knowledge.
 
+Prioritise worked examples and step-by-step solutions from tutorial sheets (doc_type: tutorial) when they appear in the context. Mirror the structure and notation of those tutorial solutions exactly in your output — if the tutorial uses a particular layout, variable naming, or step ordering, replicate it.
+
 Context:
 {context}
 
@@ -437,7 +439,7 @@ Generate exactly 3 worked numerical problems in the following format:
 ## Problem 1
 **Setup:** [Describe the scenario with specific numbers]
 **Equation/Formula:** [State the relevant equation or formula]
-**Worked Solution:** [Show each step clearly]
+**Worked Solution:** [Show each step clearly, mirroring tutorial sheet structure where available]
 **Harder Variant:** [A follow-up problem that adds complexity — e.g. a twist, additional constraint, or extension]
 
 ---
@@ -455,6 +457,34 @@ Generate exactly 3 worked numerical problems in the following format:
 **Harder Variant:**
 
 Equation Practice:""",
+    ),
+
+    "extra_practice": PromptTemplate(
+        input_variables=["context", "question"],
+        template="""You are a UCL university study assistant for a quantitative economics module.
+Use ONLY the context below. Do not use outside knowledge.
+
+Prioritise worked examples and step-by-step solutions from tutorial sheets (doc_type: tutorial) when they appear in the context. Mirror the structure and notation of those tutorial solutions exactly — replicating the same layout, variable naming, and step ordering used in the tutorials.
+
+Context:
+{context}
+
+Topic: {question}
+
+Generate 5 additional practice problems of increasing difficulty. These should go beyond the tutorial examples but stay grounded in the same methods and notation.
+
+Use this format for each:
+
+---
+## Practice Problem [N] — [Easy / Medium / Hard]
+**Setup:** [Scenario with specific numbers]
+**Equation/Formula:** [Relevant equation]
+**Worked Solution:** [Every step shown explicitly, using tutorial notation]
+**What this tests:** [One sentence naming the concept being examined]
+
+---
+
+Extra Practice:""",
     ),
 
     "priority_score": PromptTemplate(
@@ -503,7 +533,7 @@ class StudyAgent:
         )
         self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
 
-    QUANTITATIVE_ONLY_MODES = {"equation_practice"}
+    QUANTITATIVE_ONLY_MODES = {"equation_practice", "extra_practice"}
     QUANTITATIVE_MODULES = {"micro", "macro"}
     HISTORY_ONLY_MODES = {"book_themes", "chapter_summary", "book_compare", "essay_practice", "example_bank", "theme_mapper"}
     HISTORY_MODULES = {"history"}
@@ -553,7 +583,7 @@ class StudyAgent:
         if mode in ("theme_mapper", "example_bank", "book_compare"):
             k = 15
         elif mode in ("study_guide", "exam_questions", "priority_score", "equation_practice",
-                      "essay_practice", "chapter_summary", "book_themes"):
+                      "extra_practice", "essay_practice", "chapter_summary", "book_themes"):
             k = 8
         else:
             k = 5
@@ -589,7 +619,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Query the StudyAgent.")
     parser.add_argument("--module", required=True, choices=list(MODULE_COLLECTION_MAP.keys()))
-    parser.add_argument("--mode", default="qa", choices=list(PROMPTS.keys()) + ["equation_practice"])
+    parser.add_argument("--mode", default="qa", choices=list(PROMPTS.keys()))
     parser.add_argument("--question", required=True, type=str)
     args = parser.parse_args()
 

@@ -40,6 +40,7 @@ MODE_INFO = {
     "definition_bank":  "Definition Bank — 8 concept/thinker entries",
     "priority_score":   "Priority Score — HIGH / MEDIUM / LOW exam priority",
     "equation_practice":"Equation Practice — 3 worked problems (micro/macro only)",
+    "extra_practice":   "Extra Practice — 5 graded problems mirroring tutorial structure (micro/macro only)",
     "book_themes":      "Book Themes — Historiographical argument + essay questions (history only)",
     "chapter_summary":  "Chapter Summary — Argument, examples, historiographical position (history only)",
     "book_compare":     "Book Compare — Compare two books' arguments and methods (history only)",
@@ -49,7 +50,7 @@ MODE_INFO = {
 }
 
 HISTORY_ONLY     = {"book_themes", "chapter_summary", "book_compare", "essay_practice", "example_bank", "theme_mapper"}
-QUANT_ONLY       = {"equation_practice"}
+QUANT_ONLY       = {"equation_practice", "extra_practice"}
 DOWNLOADABLE_MODES = {"study_guide", "exam_questions", "flashcards", "essay_plan", "book_themes"}
 
 # ── Page config & global CSS ───────────────────────────────────────────────────

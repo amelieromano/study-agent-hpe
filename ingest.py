@@ -42,6 +42,30 @@ def ingest_module(module_key):
             print(f"  {subfolder}: {len(docs)} pages")
             all_docs.extend(docs)
 
+    # Load tutorials
+    tutorials_path = os.path.join(base, "tutorials")
+    if os.path.isdir(tutorials_path):
+        docs = load_pdfs(tutorials_path, doc_type="tutorial")
+        print(f"  tutorials: {len(docs)} pages")
+        all_docs.extend(docs)
+
+    # Load history books (chapters and root PDFs per book)
+    books_path = os.path.join(base, "books")
+    if os.path.isdir(books_path):
+        for book_dir in sorted(os.listdir(books_path)):
+            book_path = os.path.join(books_path, book_dir)
+            if not os.path.isdir(book_path):
+                continue
+            # Root-level PDFs (full book or extracts)
+            docs = load_pdfs(book_path, doc_type="course_material")
+            # Chapter-level PDFs
+            chapters_path = os.path.join(book_path, "chapters")
+            if os.path.isdir(chapters_path):
+                docs += load_pdfs(chapters_path, doc_type="course_material")
+            if docs:
+                print(f"  books/{book_dir}: {len(docs)} pages")
+            all_docs.extend(docs)
+
     # Load past papers
     past_papers_path = os.path.join("module_materials", "past_papers", module_key)
     if os.path.isdir(past_papers_path):
