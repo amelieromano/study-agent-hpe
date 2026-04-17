@@ -53,6 +53,21 @@ HISTORY_ONLY     = {"book_themes", "chapter_summary", "book_compare", "essay_pra
 QUANT_ONLY       = {"equation_practice", "extra_practice"}
 DOWNLOADABLE_MODES = {"study_guide", "exam_questions", "flashcards", "essay_plan", "book_themes"}
 
+
+def render_answer(text: str):
+    """Render an agent response with proper markdown and LaTeX equation support.
+    Splits on \\[...\\] display-math blocks and renders each segment correctly."""
+    import re
+    # Split on \[...\] display math blocks
+    parts = re.split(r'(\\\[.*?\\\])', text, flags=re.DOTALL)
+    for part in parts:
+        if part.startswith(r'\[') and part.endswith(r'\]'):
+            # Strip the \[ \] delimiters and render as LaTeX
+            latex = part[2:-2].strip()
+            st.latex(latex)
+        elif part.strip():
+            st.markdown(part)
+
 # ── Page config & global CSS ───────────────────────────────────────────────────
 st.set_page_config(page_title="Year 1 HPE Study Agent", page_icon="📖", layout="wide")
 
@@ -338,7 +353,8 @@ with tab_main:
         )
 
         # Answer card
-        st.markdown(f"<div class='answer-card'>{result['answer'].replace(chr(10), '<br>')}</div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            render_answer(result["answer"])
 
         # Source tags
         all_sources = result.get("sources", [])
@@ -389,7 +405,8 @@ with tab_weak:
         if st.session_state["weak_spot_result"]:
             ws = st.session_state["weak_spot_result"]
             st.markdown(f"### Study Guide: {ws['topic']}")
-            st.markdown(f"<div class='answer-card'>{ws['answer'].replace(chr(10), '<br>')}</div>", unsafe_allow_html=True)
+            with st.container(border=True):
+                render_answer(ws["answer"])
             if ws.get("sources"):
                 tags = "".join(f"<span class='src-tag'>{os.path.basename(s)}</span>" for s in ws["sources"])
                 st.markdown(tags, unsafe_allow_html=True)
