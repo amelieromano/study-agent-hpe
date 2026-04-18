@@ -64,6 +64,42 @@ Based on the material, what aspects of this topic are most likely to be examined
 Study Guide:""",
     ),
 
+    "study_guide_econ": PromptTemplate(
+        input_variables=["context", "question"],
+        template="""You are a UCL university study assistant creating a structured economics study guide.
+Use ONLY the context below. Do not use outside knowledge.
+Prioritise worked examples and notation from tutorial sheets (doc_type: tutorial) where available.
+
+Context:
+{context}
+
+Topic: {question}
+
+Produce a structured study guide with the following sections:
+
+## Core Concepts and Definitions
+For every key concept in this topic, give a precise one-sentence definition using the correct economic terminology.
+
+## Real-World Examples
+2-3 concrete real-world examples that illustrate the concept. Draw from the course material where possible; otherwise use examples consistent with the level of the course.
+
+## Graphical Representation
+Describe the key graph for this topic step by step:
+- What are the axes?
+- What curves or lines are drawn, and why?
+- How does each curve shift under different conditions?
+- What does each element represent economically?
+
+## Equation Applications
+Show worked equation examples in the style of the tutorial sheets:
+- State the formula
+- Substitute numerical values
+- Show each step of the solution
+- Interpret the result
+
+Study Guide:""",
+    ),
+
     "exam_questions": PromptTemplate(
         input_variables=["context", "question"],
         template="""You are a UCL university exam paper writer and study assistant.
@@ -593,7 +629,13 @@ class StudyAgent:
         source_docs = retriever.invoke(question)
         context = "\n\n".join(doc.page_content for doc in source_docs)
 
-        chain = PROMPTS[mode] | self.llm | StrOutputParser()
+        # Use econ-specific study guide for micro and macro
+        if mode == "study_guide" and self.module_key in self.QUANTITATIVE_MODULES:
+            prompt = PROMPTS["study_guide_econ"]
+        else:
+            prompt = PROMPTS[mode]
+
+        chain = prompt | self.llm | StrOutputParser()
         answer = chain.invoke({"context": context, "question": question})
 
         source_files = list({doc.metadata.get("source", "unknown") for doc in source_docs})
