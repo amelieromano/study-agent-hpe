@@ -203,3 +203,6 @@ The dominant cost is time, not money. At scale (multi-user, nightly re-ingestion
 ---
 
 *Built during exam term, April 2026.*
+
+## NOTE
+Course materials (PDFs) are excluded from this repository and must be added locally. Run python ingest.py --module [module] after adding your own PDFs to the relevant folders.
